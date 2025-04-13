@@ -4,13 +4,26 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nova Charts</title>
+  
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-8M25SCL0G0"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-8M25SCL0G0');
+  </script>
+  
   <!-- Bootstrap 5 CSS & Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  
   <!-- Google Font (optional) -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet" />
+  
   <!-- Chart.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  
   <style>
     /* Global Styles */
     body {
@@ -20,6 +33,10 @@
     /* Navbar styling */
     .navbar {
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    /* Language Switcher */
+    .language-switcher {
+      margin-left: auto;
     }
     /* Hero Section */
     .hero {
@@ -55,26 +72,35 @@
       width: 3rem;
       height: 3rem;
     }
-    #resultSection {
+    #resultSection, #codeOutputSection {
       display: none;
     }
   </style>
 </head>
 <body>
 
-  <!-- Navbar -->
+  <!-- Navbar with Brand and Language Switcher -->
   <nav class="navbar navbar-light bg-white px-4">
     <a class="navbar-brand fw-bold text-primary fs-4" href="#">
       <i class="bi bi-bar-chart-fill me-2"></i>Nova Charts
     </a>
+    <div class="dropdown language-switcher">
+      <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="languageSwitcher" data-bs-toggle="dropdown" aria-expanded="false">
+        🇺🇸 EN
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageSwitcher">
+        <li><a class="dropdown-item language-option" href="#" data-lang="en">🇺🇸 English</a></li>
+        <li><a class="dropdown-item language-option" href="#" data-lang="pt">🇵🇹 Português</a></li>
+      </ul>
+    </div>
   </nav>
 
   <!-- Hero Section -->
   <section class="hero">
     <div class="container">
-      <h1>Transform Your Data</h1>
-      <p>Instantly turn raw data into stunning, interactive charts with Nova Charts.</p>
-      <a href="#mainContent" class="btn btn-light btn-lg mt-4">Get Started</a>
+      <h1 data-key="hero.title">Transform Your Data</h1>
+      <p data-key="hero.subtitle">Instantly turn raw data into stunning, interactive charts with Nova Charts.</p>
+      <a href="#mainContent" class="btn btn-light btn-lg mt-4" data-key="hero.cta">Get Started</a>
     </div>
   </section>
 
@@ -87,27 +113,27 @@
   <div id="mainContent" class="container my-5">
     <!-- Data Input Section -->
     <div class="card mb-4">
-      <div class="card-header bg-primary text-white">Data Input</div>
+      <div class="card-header bg-primary text-white" data-key="dataInput.header">Data Input</div>
       <div class="card-body">
-        <p class="mb-3">Enter JSON data or paste the URL of a REST API endpoint that returns JSON:</p>
-        <textarea id="dataInput" class="form-control mb-3" rows="5" placeholder="Paste JSON data or API URL here..."></textarea>
+        <p class="mb-3" data-key="dataInput.body">Enter JSON data or paste the URL of a REST API endpoint that returns JSON:</p>
+        <textarea id="dataInput" class="form-control mb-3" rows="5" data-key="dataInput.placeholder" placeholder="Paste JSON data or API URL here..."></textarea>
         <div class="d-flex">
-          <button class="btn btn-info me-2" onclick="loadSampleData()">Load Sample Data</button>
-          <button class="btn btn-primary" onclick="fetchData()">Fetch Data</button>
+          <button class="btn btn-info me-2" onclick="loadSampleData()" data-key="dataInput.button.load">Load Sample Data</button>
+          <button class="btn btn-primary" onclick="fetchData()" data-key="dataInput.button.fetch">Fetch Data</button>
         </div>
-        <div id="dataError" class="mt-2 text-danger" style="display: none;">Invalid data format or couldn't fetch from URL.</div>
+        <div id="dataError" class="mt-2 text-danger" data-key="dataInput.error" style="display: none;">Invalid data format or couldn't fetch data.</div>
       </div>
     </div>
 
     <!-- Chart Generation Prompt Section -->
     <div class="card mb-4">
-      <div class="card-header bg-primary text-white">Chart Generation Prompt</div>
+      <div class="card-header bg-primary text-white" data-key="chartPrompt.header">Chart Generation Prompt</div>
       <div class="card-body">
-        <p class="mb-3">Tell Nova Charts what kind of chart you want to create based on your data:</p>
-        <textarea id="promptInput" class="form-control mb-3" rows="4" placeholder="Example: Create a chart showing sales by month..."></textarea>
+        <p class="mb-3" data-key="chartPrompt.body">Tell Nova Charts what type of chart you want to create with your data:</p>
+        <textarea id="promptInput" class="form-control mb-3" rows="4" data-key="chartPrompt.placeholder" placeholder="Example: Create a chart showing monthly sales..."></textarea>
         <!-- Chart Type Selector -->
         <div class="mb-3">
-          <label for="chartType" class="form-label">Chart Type:</label>
+          <label for="chartType" class="form-label" data-key="chartPrompt.label">Chart Type:</label>
           <select id="chartType" class="form-select">
             <option value="line" selected>Line Chart</option>
             <option value="bar">Bar Chart</option>
@@ -118,27 +144,36 @@
           </select>
         </div>
         <div class="d-flex">
-          <button class="btn btn-secondary me-2" onclick="loadSamplePrompt()">Load Sample Prompt</button>
-          <button class="btn btn-primary" onclick="generateChart()">Generate Chart</button>
+          <button class="btn btn-secondary me-2" onclick="loadSamplePrompt()" data-key="chartPrompt.button.load">Load Sample Prompt</button>
+          <button class="btn btn-primary" onclick="generateChart()" data-key="chartPrompt.button.generate">Generate Chart</button>
         </div>
-        <div id="promptError" class="mt-2 text-danger" style="display: none;">Please provide a prompt for chart generation.</div>
+        <div id="promptError" class="mt-2 text-danger" data-key="chartPrompt.error" style="display: none;">Please provide a prompt for chart generation.</div>
       </div>
     </div>
 
     <!-- Loading Indicator -->
     <div id="loadingIndicator" class="text-center my-4" style="display: none;">
       <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
+        <span class="visually-hidden" data-key="loadingIndicator.text">Processing your request...</span>
       </div>
-      <p class="mt-2">Processing your request...</p>
+      <p class="mt-2" data-key="loadingIndicator.text">Processing your request...</p>
     </div>
 
-    <!-- Chart Result Section -->
-    <div id="resultSection" class="card">
-      <div class="card-header bg-primary text-white">Generated Chart</div>
+    <!-- Generated Chart Section -->
+    <div id="resultSection" class="card mb-4">
+      <div class="card-header bg-primary text-white" data-key="resultSection.header">Generated Chart</div>
       <div class="card-body">
         <canvas id="chartCanvas"></canvas>
         <div id="chartDescription" class="mt-4"></div>
+      </div>
+    </div>
+
+    <!-- Generated Code Panel -->
+    <div id="codeOutputSection" class="card mb-4" style="display: none;">
+      <div class="card-header bg-secondary text-white" data-key="codeOutputSection.header">Generated Code</div>
+      <div class="card-body">
+        <pre id="codeOutput" class="bg-light p-3" style="overflow-x: auto;"></pre>
+        <button id="copyButton" class="btn btn-outline-primary mt-3" data-key="codeOutputSection.button">Copy Code</button>
       </div>
     </div>
   </div>
@@ -146,30 +181,146 @@
   <!-- Offcanvas API Key Manager -->
   <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasApiKey" aria-labelledby="offcanvasApiKeyLabel">
     <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="offcanvasApiKeyLabel">API Key Manager</h5>
+      <h5 class="offcanvas-title" id="offcanvasApiKeyLabel" data-key="offcanvas.header">API Key Manager</h5>
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
-      <label for="apiKey" class="form-label">DeepSeek API Key:</label>
-      <input type="password" id="apiKey" class="form-control mb-3" placeholder="Enter your API key" />
-      <button class="btn btn-success w-100" onclick="saveApiKey()">Save API Key</button>
-      <p class="mt-3 text-muted"><small>Your API key is stored locally and is never sent to any server.</small></p>
+      <label for="apiKey" class="form-label" data-key="offcanvas.label">DeepSeek API Key:</label>
+      <input type="password" id="apiKey" class="form-control mb-3" data-key="offcanvas.placeholder" placeholder="Enter your API key" />
+      <button class="btn btn-success w-100" onclick="saveApiKey()" data-key="offcanvas.button">Save API Key</button>
+      <p class="mt-3 text-muted" data-key="offcanvas.note"><small>Your API key is stored locally and is never sent to any server.</small></p>
     </div>
   </div>
 
   <!-- Bootstrap Bundle JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    let currentData = null;
-    let currentChart = null;
 
-    // On page load, retrieve the API key from local storage
+  <script>
+    // Translations for English and Portuguese
+    const translations = {
+      en: {
+        "hero.title": "Transform Your Data",
+        "hero.subtitle": "Instantly turn raw data into stunning, interactive charts with Nova Charts.",
+        "hero.cta": "Get Started",
+        "dataInput.header": "Data Input",
+        "dataInput.body": "Enter JSON data or paste the URL of a REST API endpoint that returns JSON:",
+        "dataInput.placeholder": "Paste JSON data or API URL here...",
+        "dataInput.button.load": "Load Sample Data",
+        "dataInput.button.fetch": "Fetch Data",
+        "dataInput.error": "Invalid data format or couldn't fetch data.",
+        "chartPrompt.header": "Chart Generation Prompt",
+        "chartPrompt.body": "Tell Nova Charts what type of chart you want to create with your data:",
+        "chartPrompt.placeholder": "Example: Create a chart showing monthly sales...",
+        "chartPrompt.label": "Chart Type:",
+        "chartPrompt.button.load": "Load Sample Prompt",
+        "chartPrompt.button.generate": "Generate Chart",
+        "chartPrompt.error": "Please provide a prompt for chart generation.",
+        "loadingIndicator.text": "Processing your request...",
+        "resultSection.header": "Generated Chart",
+        "codeOutputSection.header": "Generated Code",
+        "codeOutputSection.button": "Copy Code",
+        "offcanvas.header": "API Key Manager",
+        "offcanvas.label": "DeepSeek API Key:",
+        "offcanvas.placeholder": "Enter your API key",
+        "offcanvas.button": "Save API Key",
+        "offcanvas.note": "Your API key is stored locally and is never sent to any server."
+      },
+      pt: {
+        "hero.title": "Transforme os Seus Dados",
+        "hero.subtitle": "Converta dados brutos em gráficos interativos impressionantes com a Nova Charts.",
+        "hero.cta": "Comece Agora",
+        "dataInput.header": "Input de Dados",
+        "dataInput.body": "Insira dados em JSON ou cole a URL de um endpoint REST que retorne JSON:",
+        "dataInput.placeholder": "Cole os dados JSON ou URL aqui...",
+        "dataInput.button.load": "Carregar Dados Exemplo",
+        "dataInput.button.fetch": "Obter Dados",
+        "dataInput.error": "Formato de dados inválido ou não foi possível obter os dados.",
+        "chartPrompt.header": "Prompt de Geração de Gráfico",
+        "chartPrompt.body": "Diga à Nova Charts que tipo de gráfico pretende criar com os seus dados:",
+        "chartPrompt.placeholder": "Exemplo: Crie um gráfico que mostre as vendas mensais...",
+        "chartPrompt.label": "Tipo de Gráfico:",
+        "chartPrompt.button.load": "Carregar Prompt Exemplo",
+        "chartPrompt.button.generate": "Gerar Gráfico",
+        "chartPrompt.error": "Por favor, forneça um prompt para a geração do gráfico.",
+        "loadingIndicator.text": "A processar o seu pedido...",
+        "resultSection.header": "Gráfico Gerado",
+        "codeOutputSection.header": "Código Gerado",
+        "codeOutputSection.button": "Copiar Código",
+        "offcanvas.header": "Gerenciador da API Key",
+        "offcanvas.label": "DeepSeek API Key:",
+        "offcanvas.placeholder": "Insira a sua API key",
+        "offcanvas.button": "Salvar API Key",
+        "offcanvas.note": "A sua API key é guardada localmente e nunca é enviada para qualquer servidor."
+      }
+    };
+
+    let currentLanguage = "en";
+
+    // Function to update texts based on selected language
+    function updateLanguage(lang) {
+      currentLanguage = lang;
+      document.querySelectorAll('[data-key]').forEach(el => {
+        const key = el.getAttribute('data-key');
+        if (translations[lang] && translations[lang][key]) {
+          el.textContent = translations[lang][key];
+        }
+      });
+      // Update placeholders separately
+      document.querySelectorAll('[data-key][placeholder]').forEach(el => {
+        const key = el.getAttribute('data-key');
+        if (translations[lang] && translations[lang][key]) {
+          el.setAttribute('placeholder', translations[lang][key]);
+        }
+      });
+      // Update language switcher button text
+      const langSwitcherButton = document.getElementById('languageSwitcher');
+      if (lang === "en") {
+        langSwitcherButton.innerHTML = "🇺🇸 EN";
+      } else if (lang === "pt") {
+        langSwitcherButton.innerHTML = "🇵🇹 PT";
+      }
+    }
+
+    // Set up language switcher events
+    document.querySelectorAll('.language-option').forEach(item => {
+      item.addEventListener('click', event => {
+        event.preventDefault();
+        const selectedLang = item.getAttribute('data-lang');
+        updateLanguage(selectedLang);
+      });
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
       const storedKey = localStorage.getItem('deepseekApiKey');
       if (storedKey) {
         document.getElementById('apiKey').value = storedKey;
       }
+      // Set default language to English
+      updateLanguage("en");
+
+      // Set up Copy Code button
+      document.getElementById('copyButton').addEventListener('click', function() {
+        const codeContent = document.getElementById('codeOutput').textContent;
+        navigator.clipboard.writeText(codeContent).then(function() {
+          alert("Code copied to clipboard!");
+        }, function(err) {
+          alert("Error copying code: " + err);
+        });
+      });
     });
+
+    // Sample prompts based on chart type
+    const samplePrompts = {
+      line: "Crie um gráfico de linha que mostre as tendências mensais de vendas. Utilize uma linha azul para as vendas e uma vermelha para o número de clientes. Título: 'Desempenho Mensal'. O eixo Y deve começar em 0.",
+      bar: "Crie um gráfico de barras comparando as vendas de cada mês. Utilize barras azuis para as vendas e vermelhas para os clientes. Título: 'Comparação Mensal de Vendas'.",
+      pie: "Crie um gráfico de pizza que ilustre a percentagem de vendas em cada mês. Título: 'Distribuição Percentual de Vendas Mensais'.",
+      doughnut: "Crie um gráfico anelar que exiba a distribuição percentual de vendas mensais. Título: 'Distribuição de Vendas Mensais'.",
+      radar: "Crie um gráfico radar comparando diferentes métricas (vendas, clientes, etc.) ao longo dos meses. Título: 'Comparação de Métricas Mensais'.",
+      polarArea: "Crie um gráfico de área polar para visualizar a distribuição dos dados de vendas por mês. Título: 'Distribuição de Vendas (Área Polar)'."
+    };
+
+    let currentData = null;
+    let currentChart = null;
 
     function saveApiKey() {
       const key = document.getElementById('apiKey').value.trim();
@@ -196,7 +347,8 @@
     }
 
     function loadSamplePrompt() {
-      document.getElementById('promptInput').value = "Create a chart showing monthly sales trends. Use a blue line for sales and a red line for customer count. Title: 'Monthly Sales Performance'. Ensure the Y-axis starts at zero.";
+      const chartType = document.getElementById('chartType').value;
+      document.getElementById('promptInput').value = samplePrompts[chartType] || "";
     }
 
     async function fetchData() {
@@ -252,27 +404,27 @@
 
       document.getElementById('resultSection').style.display = 'none';
       document.getElementById('chartDescription').innerHTML = '';
+      document.getElementById('codeOutputSection').style.display = 'none';
       showLoading(true);
 
       try {
-        // Updated system message with chart type and palette instructions
-        const systemMessage = `You are a data visualization expert for Nova Charts. Generate JavaScript code using Chart.js to visualize data.
-Return only valid JavaScript code that can run with Chart.js.
-IMPORTANT:
-  - Use 'chartCanvas' as the canvas reference and assign the resulting Chart.js instance to a variable named 'chart'.
-  - The chart type should be "${chartType}".
-  - Apply the Nova Charts color palette to the chart:
-       • Primary: #0077cc
-       • Secondary: #00aaff
-       • Accent: #66ccff
-       • Additional Colors: #ff9933, #ff6633
-Do not include any additional text, explanations, or markdown formatting in your response.`;
+        const systemMessage = `Você é um especialista em visualização de dados para a Nova Charts. Gere código JavaScript utilizando Chart.js para visualizar dados.
+Retorne apenas código JavaScript válido que possa ser executado com o Chart.js.
+IMPORTANTE:
+  - Use 'chartCanvas' como referência do canvas e atribua a instância do Chart.js à variável 'chart'.
+  - O tipo de gráfico deverá ser "${chartType}".
+  - Aplique a paleta de cores da Nova Charts ao gráfico:
+       • Primária: #0077cc
+       • Secundária: #00aaff
+       • Acento: #66ccff
+       • Cores adicionais: #ff9933, #ff6633
+Não inclua nenhum texto adicional, explicações ou formatação markdown na resposta.`;
 
         const requestBody = {
           model: "deepseek-coder",
           messages: [
             { role: "system", content: systemMessage },
-            { role: "user", content: `Data: ${JSON.stringify(currentData)}\n\nRequirement: ${prompt}\n\nReturn only JavaScript code.` }
+            { role: "user", content: `Data: ${JSON.stringify(currentData)}\n\nRequirement: ${prompt}\n\nRetorne apenas código JavaScript.` }
           ],
           temperature: 0.7,
           max_tokens: 2000
@@ -299,7 +451,7 @@ Do not include any additional text, explanations, or markdown formatting in your
           body: JSON.stringify({
             model: "deepseek-chat",
             messages: [
-              { role: "system", content: "Write a brief summary (2-3 sentences) explaining the key insights from the generated chart." },
+              { role: "system", content: "Escreva um breve resumo (2-3 frases) explicando os principais insights do gráfico gerado." },
               { role: "user", content: `Data: ${JSON.stringify(currentData)}\nChart requirement: ${prompt}` }
             ],
             temperature: 0.7,
@@ -327,11 +479,13 @@ Do not include any additional text, explanations, or markdown formatting in your
           return chart;
         `);
         currentChart = chartFunction(currentData, document, Chart);
-        document.getElementById('chartDescription').innerHTML = `<h5>Analysis</h5><p>${description}</p>`;
+        document.getElementById('chartDescription').innerHTML = `<h5>Análise</h5><p>${description}</p>`;
         document.getElementById('resultSection').style.display = 'block';
+        document.getElementById('codeOutput').textContent = code;
+        document.getElementById('codeOutputSection').style.display = 'block';
       } catch (err) {
         document.getElementById('promptError').style.display = 'block';
-        document.getElementById('promptError').textContent = `Chart execution error: ${err.message}`;
+        document.getElementById('promptError').textContent = `Erro na execução do gráfico: ${err.message}`;
       }
     }
 
@@ -339,5 +493,20 @@ Do not include any additional text, explanations, or markdown formatting in your
       document.getElementById('loadingIndicator').style.display = show ? 'block' : 'none';
     }
   </script>
+
+  <!--Start of Tawk.to Script-->
+  <script type="text/javascript">
+    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+    (function(){
+      var s1=document.createElement("script"), s0=document.getElementsByTagName("script")[0];
+      s1.async=true;
+      s1.src='https://embed.tawk.to/67fb527f2a4d5e190baf585b/1iomrkgli';
+      s1.charset='UTF-8';
+      s1.setAttribute('crossorigin','*');
+      s0.parentNode.insertBefore(s1,s0);
+    })();
+  </script>
+  <!--End of Tawk.to Script-->
+
 </body>
 </html>
