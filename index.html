@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nova Charts</title>
   
-  <!-- Google tag (gtag.js) -->
+  <!-- Google tag (gtag.js) for Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-8M25SCL0G0"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -18,7 +18,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
   
-  <!-- Google Font (optional) -->
+  <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet" />
   
   <!-- Chart.js -->
@@ -29,6 +29,7 @@
     body {
       font-family: 'Montserrat', sans-serif;
       background-color: #f8f9fa;
+      transition: background-color 0.3s ease;
     }
     /* Navbar styling */
     .navbar {
@@ -44,6 +45,7 @@
       color: #fff;
       padding: 100px 0;
       text-align: center;
+      transition: background 0.5s ease;
     }
     .hero h1 {
       font-size: 3rem;
@@ -53,25 +55,49 @@
       font-size: 1.25rem;
       margin-top: 1rem;
     }
-    /* Fixed Settings Button */
+    /* Improved Settings Button */
     #settingsBtn {
       position: fixed;
-      top: 20px;
-      right: 20px;
+      top: 40px;
+      right: 0px;
       z-index: 1050;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      padding: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 55px;
+      height: 55px;
+      background-color: #0077cc;
+      border: none;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+      color: #fff;
+      font-size: 24px;
+      transition: transform 0.3s ease, background-color 0.3s ease;
+    }
+    #settingsBtn:hover {
+      transform: scale(1.1);
+      background-color: #005fa3;
+    }
+    /* Card Enhancements */
+    .card {
+      border: none;
+      border-radius: 0.5rem;
+      box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+      transition: transform 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+    }
+    /* Code Panel Styling */
+    pre {
+      background-color: #e9ecef;
+      border-radius: 0.25rem;
+      padding: 1rem;
+      font-size: 0.875rem;
+      overflow-x: auto;
     }
     /* Loading Indicator */
     .spinner-border {
       width: 3rem;
       height: 3rem;
     }
+    /* Initially hide sections */
     #resultSection, #codeOutputSection {
       display: none;
     }
@@ -104,9 +130,9 @@
     </div>
   </section>
 
-  <!-- Fixed Settings Icon Button (Offcanvas Trigger) -->
-  <button id="settingsBtn" class="btn btn-outline-secondary" data-bs-toggle="offcanvas" data-bs-target="#offcanvasApiKey" aria-controls="offcanvasApiKey">
-    <i class="bi bi-gear fs-5"></i>
+  <!-- Improved Fixed Settings Icon Button (Offcanvas Trigger) -->
+  <button id="settingsBtn" class="btn" data-bs-toggle="offcanvas" data-bs-target="#offcanvasApiKey" aria-controls="offcanvasApiKey">
+    <i class="bi bi-gear"></i>
   </button>
 
   <!-- Main Content -->
@@ -254,7 +280,29 @@
       }
     };
 
+    // Sample prompts for each chart type in both languages
+    const samplePrompts = {
+      en: {
+        line: "Create a line chart that shows monthly sales trends. Use a blue line for sales and a red line for customer count. Title: 'Monthly Performance'. The Y-axis should start at 0.",
+        bar: "Create a bar chart comparing monthly sales. Use blue bars for sales and red bars for customers. Title: 'Monthly Sales Comparison'.",
+        pie: "Create a pie chart that illustrates the percentage of monthly sales. Title: 'Monthly Sales Distribution'.",
+        doughnut: "Create a doughnut chart showing the percentage distribution of monthly sales. Title: 'Monthly Sales Distribution'.",
+        radar: "Create a radar chart comparing different metrics (sales, customers, etc.) over the months. Title: 'Monthly Metrics Comparison'.",
+        polarArea: "Create a polar area chart to visualize the distribution of monthly sales data. Title: 'Monthly Sales Distribution (Polar Area)'."
+      },
+      pt: {
+        line: "Crie um gráfico de linha que mostre as tendências mensais de vendas. Utilize uma linha azul para as vendas e uma vermelha para o número de clientes. Título: 'Desempenho Mensal'. O eixo Y deve começar em 0.",
+        bar: "Crie um gráfico de barras comparando as vendas de cada mês. Utilize barras azuis para as vendas e vermelhas para os clientes. Título: 'Comparação Mensal de Vendas'.",
+        pie: "Crie um gráfico de pizza que ilustre a percentagem de vendas em cada mês. Título: 'Distribuição Percentual de Vendas Mensais'.",
+        doughnut: "Crie um gráfico anelar que exiba a distribuição percentual de vendas mensais. Título: 'Distribuição de Vendas Mensais'.",
+        radar: "Crie um gráfico radar comparando diferentes métricas (vendas, clientes, etc.) ao longo dos meses. Título: 'Comparação de Métricas Mensais'.",
+        polarArea: "Crie um gráfico de área polar para visualizar a distribuição dos dados de vendas por mês. Título: 'Distribuição de Vendas (Área Polar)'."
+      }
+    };
+
     let currentLanguage = "en";
+    let currentData = null;
+    let currentChart = null;
 
     // Function to update texts based on selected language
     function updateLanguage(lang) {
@@ -309,18 +357,12 @@
       });
     });
 
-    // Sample prompts based on chart type
-    const samplePrompts = {
-      line: "Crie um gráfico de linha que mostre as tendências mensais de vendas. Utilize uma linha azul para as vendas e uma vermelha para o número de clientes. Título: 'Desempenho Mensal'. O eixo Y deve começar em 0.",
-      bar: "Crie um gráfico de barras comparando as vendas de cada mês. Utilize barras azuis para as vendas e vermelhas para os clientes. Título: 'Comparação Mensal de Vendas'.",
-      pie: "Crie um gráfico de pizza que ilustre a percentagem de vendas em cada mês. Título: 'Distribuição Percentual de Vendas Mensais'.",
-      doughnut: "Crie um gráfico anelar que exiba a distribuição percentual de vendas mensais. Título: 'Distribuição de Vendas Mensais'.",
-      radar: "Crie um gráfico radar comparando diferentes métricas (vendas, clientes, etc.) ao longo dos meses. Título: 'Comparação de Métricas Mensais'.",
-      polarArea: "Crie um gráfico de área polar para visualizar a distribuição dos dados de vendas por mês. Título: 'Distribuição de Vendas (Área Polar)'."
-    };
-
-    let currentData = null;
-    let currentChart = null;
+    // Function to load a sample prompt based on chart type and current language
+    function loadSamplePrompt() {
+      const chartType = document.getElementById('chartType').value;
+      const samplePrompt = samplePrompts[currentLanguage][chartType] || "";
+      document.getElementById('promptInput').value = samplePrompt;
+    }
 
     function saveApiKey() {
       const key = document.getElementById('apiKey').value.trim();
@@ -344,11 +386,6 @@
         ]
       };
       document.getElementById('dataInput').value = JSON.stringify(sampleData, null, 2);
-    }
-
-    function loadSamplePrompt() {
-      const chartType = document.getElementById('chartType').value;
-      document.getElementById('promptInput').value = samplePrompts[chartType] || "";
     }
 
     async function fetchData() {
@@ -408,7 +445,21 @@
       showLoading(true);
 
       try {
-        const systemMessage = `Você é um especialista em visualização de dados para a Nova Charts. Gere código JavaScript utilizando Chart.js para visualizar dados.
+        let systemMessage;
+        if (currentLanguage === "en") {
+          systemMessage = `You are a data visualization expert for Nova Charts. Generate JavaScript code using Chart.js to visualize data.
+Return only valid JavaScript code that can run with Chart.js.
+IMPORTANT:
+  - Use 'chartCanvas' as the canvas reference and assign the Chart.js instance to a variable called 'chart'.
+  - The chart type must be "${chartType}".
+  - Apply the Nova Charts color palette to the chart:
+       • Primary: #0077cc
+       • Secondary: #00aaff
+       • Accent: #66ccff
+       • Additional Colors: #ff9933, #ff6633
+Do not include any additional text, explanations, or markdown formatting in your response.`;
+        } else {
+          systemMessage = `Você é um especialista em visualização de dados para a Nova Charts. Gere código JavaScript utilizando Chart.js para visualizar dados.
 Retorne apenas código JavaScript válido que possa ser executado com o Chart.js.
 IMPORTANTE:
   - Use 'chartCanvas' como referência do canvas e atribua a instância do Chart.js à variável 'chart'.
@@ -419,6 +470,7 @@ IMPORTANTE:
        • Acento: #66ccff
        • Cores adicionais: #ff9933, #ff6633
 Não inclua nenhum texto adicional, explicações ou formatação markdown na resposta.`;
+        }
 
         const requestBody = {
           model: "deepseek-coder",
@@ -451,7 +503,7 @@ Não inclua nenhum texto adicional, explicações ou formatação markdown na re
           body: JSON.stringify({
             model: "deepseek-chat",
             messages: [
-              { role: "system", content: "Escreva um breve resumo (2-3 frases) explicando os principais insights do gráfico gerado." },
+              { role: "system", content: currentLanguage === "en" ? "Write a brief summary (2-3 sentences) explaining the key insights of the generated chart." : "Escreva um breve resumo (2-3 frases) explicando os principais insights do gráfico gerado." },
               { role: "user", content: `Data: ${JSON.stringify(currentData)}\nChart requirement: ${prompt}` }
             ],
             temperature: 0.7,
@@ -473,8 +525,8 @@ Não inclua nenhum texto adicional, explicações ou formatação markdown na re
     function executeChartCode(code, description) {
       if (currentChart) currentChart.destroy();
       try {
+        // Removed duplicate declaration of "chartCanvas" so that the generated code handles it.
         const chartFunction = new Function('data', 'document', 'Chart', `
-          const chartCanvas = document.getElementById('chartCanvas');
           ${code}
           return chart;
         `);
