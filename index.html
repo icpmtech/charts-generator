@@ -17,12 +17,10 @@
       font-family: 'Montserrat', sans-serif;
       background-color: #f8f9fa;
     }
-
     /* Navbar styling */
     .navbar {
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-
     /* Hero Section */
     .hero {
       background: linear-gradient(135deg, #0077cc 0%, #00aaff 100%);
@@ -38,7 +36,6 @@
       font-size: 1.25rem;
       margin-top: 1rem;
     }
-
     /* Fixed Settings Button */
     #settingsBtn {
       position: fixed;
@@ -53,7 +50,6 @@
       align-items: center;
       justify-content: center;
     }
-
     /* Loading Indicator */
     .spinner-border {
       width: 3rem;
@@ -108,7 +104,19 @@
       <div class="card-header bg-primary text-white">Chart Generation Prompt</div>
       <div class="card-body">
         <p class="mb-3">Tell Nova Charts what kind of chart you want to create based on your data:</p>
-        <textarea id="promptInput" class="form-control mb-3" rows="4" placeholder="Example: Create a bar chart showing sales by month..."></textarea>
+        <textarea id="promptInput" class="form-control mb-3" rows="4" placeholder="Example: Create a chart showing sales by month..."></textarea>
+        <!-- Chart Type Selector -->
+        <div class="mb-3">
+          <label for="chartType" class="form-label">Chart Type:</label>
+          <select id="chartType" class="form-select">
+            <option value="line" selected>Line Chart</option>
+            <option value="bar">Bar Chart</option>
+            <option value="pie">Pie Chart</option>
+            <option value="doughnut">Doughnut Chart</option>
+            <option value="radar">Radar Chart</option>
+            <option value="polarArea">Polar Area Chart</option>
+          </select>
+        </div>
         <div class="d-flex">
           <button class="btn btn-secondary me-2" onclick="loadSamplePrompt()">Load Sample Prompt</button>
           <button class="btn btn-primary" onclick="generateChart()">Generate Chart</button>
@@ -142,7 +150,7 @@
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
-      <label for="apiKey" class="form-label">Nova Charts API Key:</label>
+      <label for="apiKey" class="form-label">DeepSeek API Key:</label>
       <input type="password" id="apiKey" class="form-control mb-3" placeholder="Enter your API key" />
       <button class="btn btn-success w-100" onclick="saveApiKey()">Save API Key</button>
       <p class="mt-3 text-muted"><small>Your API key is stored locally and is never sent to any server.</small></p>
@@ -155,8 +163,9 @@
     let currentData = null;
     let currentChart = null;
 
+    // On page load, retrieve the API key from local storage
     document.addEventListener('DOMContentLoaded', () => {
-      const storedKey = localStorage.getItem('novaChartsApiKey');
+      const storedKey = localStorage.getItem('deepseekApiKey');
       if (storedKey) {
         document.getElementById('apiKey').value = storedKey;
       }
@@ -165,7 +174,7 @@
     function saveApiKey() {
       const key = document.getElementById('apiKey').value.trim();
       if (key) {
-        localStorage.setItem('novaChartsApiKey', key);
+        localStorage.setItem('deepseekApiKey', key);
         alert('API Key saved locally.');
       } else {
         alert('Please enter a valid API key.');
@@ -187,7 +196,7 @@
     }
 
     function loadSamplePrompt() {
-      document.getElementById('promptInput').value = "Create a line chart showing monthly sales trends. Use a blue line for sales and a red line for customer count. Title: 'Monthly Sales Performance'. Ensure the Y-axis starts at zero.";
+      document.getElementById('promptInput').value = "Create a chart showing monthly sales trends. Use a blue line for sales and a red line for customer count. Title: 'Monthly Sales Performance'. Ensure the Y-axis starts at zero.";
     }
 
     async function fetchData() {
@@ -215,6 +224,7 @@
     async function generateChart() {
       const prompt = document.getElementById('promptInput').value.trim();
       const apiKey = document.getElementById('apiKey').value.trim();
+      const chartType = document.getElementById('chartType').value;
       const errorPrompt = document.getElementById('promptError');
       const errorData = document.getElementById('dataError');
 
@@ -245,11 +255,12 @@
       showLoading(true);
 
       try {
-        // Updated system message to include instructions for palette styling.
+        // Updated system message with chart type and palette instructions
         const systemMessage = `You are a data visualization expert for Nova Charts. Generate JavaScript code using Chart.js to visualize data.
 Return only valid JavaScript code that can run with Chart.js.
 IMPORTANT:
   - Use 'chartCanvas' as the canvas reference and assign the resulting Chart.js instance to a variable named 'chart'.
+  - The chart type should be "${chartType}".
   - Apply the Nova Charts color palette to the chart:
        • Primary: #0077cc
        • Secondary: #00aaff
@@ -258,7 +269,7 @@ IMPORTANT:
 Do not include any additional text, explanations, or markdown formatting in your response.`;
 
         const requestBody = {
-          model: "nova-charts-coder",
+          model: "deepseek-coder",
           messages: [
             { role: "system", content: systemMessage },
             { role: "user", content: `Data: ${JSON.stringify(currentData)}\n\nRequirement: ${prompt}\n\nReturn only JavaScript code.` }
@@ -267,7 +278,7 @@ Do not include any additional text, explanations, or markdown formatting in your
           max_tokens: 2000
         };
 
-        const response = await fetch('https://api.novacharts.com/v1/chat/completions', {
+        const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -279,14 +290,14 @@ Do not include any additional text, explanations, or markdown formatting in your
         const chartCode = (await response.json()).choices?.[0]?.message?.content;
         if (!chartCode) throw new Error("No chart code returned.");
 
-        const descResponse = await fetch('https://api.novacharts.com/v1/chat/completions', {
+        const descResponse = await fetch('https://api.deepseek.com/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${apiKey}`
           },
           body: JSON.stringify({
-            model: "nova-charts-chat",
+            model: "deepseek-chat",
             messages: [
               { role: "system", content: "Write a brief summary (2-3 sentences) explaining the key insights from the generated chart." },
               { role: "user", content: `Data: ${JSON.stringify(currentData)}\nChart requirement: ${prompt}` }
