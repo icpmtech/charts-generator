@@ -3,15 +3,43 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dynamic Chart Generator with DeepSeek</title>
-  <!-- Bootstrap 5 CSS -->
+  <title>Nova Charts</title>
+  <!-- Bootstrap 5 CSS & Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <!-- Bootstrap Icons CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <!-- Google Font (optional) -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet" />
   <!-- Chart.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
   <style>
-    /* Fixed settings icon button style */
+    /* Global Styles */
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: #f8f9fa;
+    }
+
+    /* Navbar styling */
+    .navbar {
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, #0077cc 0%, #00aaff 100%);
+      color: #fff;
+      padding: 100px 0;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 600;
+    }
+    .hero p {
+      font-size: 1.25rem;
+      margin-top: 1rem;
+    }
+
+    /* Fixed Settings Button */
     #settingsBtn {
       position: fixed;
       top: 20px;
@@ -25,6 +53,8 @@
       align-items: center;
       justify-content: center;
     }
+
+    /* Loading Indicator */
     .spinner-border {
       width: 3rem;
       height: 3rem;
@@ -35,95 +65,107 @@
   </style>
 </head>
 <body>
-  <!-- Settings Icon Button -->
-  <button id="settingsBtn" class="btn btn-secondary" data-bs-toggle="offcanvas" data-bs-target="#offcanvasApiKey" aria-controls="offcanvasApiKey">
-    <i class="bi bi-gear fs-4"></i>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-light bg-white px-4">
+    <a class="navbar-brand fw-bold text-primary fs-4" href="#">
+      <i class="bi bi-bar-chart-fill me-2"></i>Nova Charts
+    </a>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <h1>Transform Your Data</h1>
+      <p>Instantly turn raw data into stunning, interactive charts with Nova Charts.</p>
+      <a href="#mainContent" class="btn btn-light btn-lg mt-4">Get Started</a>
+    </div>
+  </section>
+
+  <!-- Fixed Settings Icon Button (Offcanvas Trigger) -->
+  <button id="settingsBtn" class="btn btn-outline-secondary" data-bs-toggle="offcanvas" data-bs-target="#offcanvasApiKey" aria-controls="offcanvasApiKey">
+    <i class="bi bi-gear fs-5"></i>
   </button>
-  
-  <div class="container my-4">
-    <div class="row">
-      <!-- Main Content Column -->
-      <div class="col-md-12">
-        <h1 class="mb-4">Dynamic Chart Generator with <span class="text-primary">DeepSeek</span></h1>
-        <!-- Data Input Section -->
-        <div class="card mb-4">
-          <div class="card-header">Data Input</div>
-          <div class="card-body">
-            <p>Enter JSON data or paste the URL of a REST API endpoint that returns JSON:</p>
-            <textarea id="dataInput" class="form-control mb-3" rows="5" placeholder="Paste JSON data or API URL here..."></textarea>
-            <button class="btn btn-info me-2" onclick="loadSampleData()">Load Sample Data</button>
-            <button class="btn btn-primary" onclick="fetchData()">Fetch Data</button>
-            <div id="dataError" class="mt-2 text-danger" style="display: none;">Invalid data format or couldn't fetch from URL.</div>
-          </div>
+
+  <!-- Main Content -->
+  <div id="mainContent" class="container my-5">
+    <!-- Data Input Section -->
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">Data Input</div>
+      <div class="card-body">
+        <p class="mb-3">Enter JSON data or paste the URL of a REST API endpoint that returns JSON:</p>
+        <textarea id="dataInput" class="form-control mb-3" rows="5" placeholder="Paste JSON data or API URL here..."></textarea>
+        <div class="d-flex">
+          <button class="btn btn-info me-2" onclick="loadSampleData()">Load Sample Data</button>
+          <button class="btn btn-primary" onclick="fetchData()">Fetch Data</button>
         </div>
-        <!-- Chart Generation Prompt Section -->
-        <div class="card mb-4">
-          <div class="card-header">Chart Generation Prompt</div>
-          <div class="card-body">
-            <p>Tell DeepSeek what kind of chart you want to create based on your data:</p>
-            <textarea id="promptInput" class="form-control mb-3" rows="4" placeholder="Example: Create a bar chart showing sales by month..."></textarea>
-            <button class="btn btn-secondary me-2" onclick="loadSamplePrompt()">Load Sample Prompt</button>
-            <button class="btn btn-primary" onclick="generateChart()">Generate Chart</button>
-            <div id="promptError" class="mt-2 text-danger" style="display: none;">Please provide a prompt for chart generation.</div>
-          </div>
+        <div id="dataError" class="mt-2 text-danger" style="display: none;">Invalid data format or couldn't fetch from URL.</div>
+      </div>
+    </div>
+
+    <!-- Chart Generation Prompt Section -->
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">Chart Generation Prompt</div>
+      <div class="card-body">
+        <p class="mb-3">Tell Nova Charts what kind of chart you want to create based on your data:</p>
+        <textarea id="promptInput" class="form-control mb-3" rows="4" placeholder="Example: Create a bar chart showing sales by month..."></textarea>
+        <div class="d-flex">
+          <button class="btn btn-secondary me-2" onclick="loadSamplePrompt()">Load Sample Prompt</button>
+          <button class="btn btn-primary" onclick="generateChart()">Generate Chart</button>
         </div>
-        <!-- Loading Indicator -->
-        <div id="loadingIndicator" class="text-center my-4" style="display: none;">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
-          <p class="mt-2">Processing your request...</p>
-        </div>
-        <!-- Result Section -->
-        <div id="resultSection" class="card">
-          <div class="card-header">Generated Chart</div>
-          <div class="card-body">
-            <div class="mb-4">
-              <canvas id="chartCanvas"></canvas>
-            </div>
-            <div id="chartDescription"></div>
-          </div>
-        </div>
+        <div id="promptError" class="mt-2 text-danger" style="display: none;">Please provide a prompt for chart generation.</div>
+      </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="text-center my-4" style="display: none;">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">Processing your request...</p>
+    </div>
+
+    <!-- Chart Result Section -->
+    <div id="resultSection" class="card">
+      <div class="card-header bg-primary text-white">Generated Chart</div>
+      <div class="card-body">
+        <canvas id="chartCanvas"></canvas>
+        <div id="chartDescription" class="mt-4"></div>
       </div>
     </div>
   </div>
 
-  <!-- Bootstrap Offcanvas for API Key Manager -->
+  <!-- Offcanvas API Key Manager -->
   <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasApiKey" aria-labelledby="offcanvasApiKeyLabel">
     <div class="offcanvas-header">
       <h5 class="offcanvas-title" id="offcanvasApiKeyLabel">API Key Manager</h5>
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
-      <div class="mb-3">
-        <label for="apiKey" class="form-label">DeepSeek API Key:</label>
-        <input type="password" id="apiKey" class="form-control" placeholder="Enter your API key">
-      </div>
+      <label for="apiKey" class="form-label">Nova Charts API Key:</label>
+      <input type="password" id="apiKey" class="form-control mb-3" placeholder="Enter your API key" />
       <button class="btn btn-success w-100" onclick="saveApiKey()">Save API Key</button>
-      <p class="mt-2"><small>Your API key is stored locally and is never sent to our servers.</small></p>
+      <p class="mt-3 text-muted"><small>Your API key is stored locally and is never sent to any server.</small></p>
     </div>
   </div>
 
-  <!-- Bootstrap 5 Bundle JS -->
+  <!-- Bootstrap Bundle JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     let currentData = null;
     let currentChart = null;
 
-    document.addEventListener('DOMContentLoaded', loadApiKey);
-
-    function loadApiKey() {
-      const storedKey = localStorage.getItem('deepseekApiKey');
+    document.addEventListener('DOMContentLoaded', () => {
+      const storedKey = localStorage.getItem('novaChartsApiKey');
       if (storedKey) {
         document.getElementById('apiKey').value = storedKey;
       }
-    }
+    });
 
     function saveApiKey() {
-      const apiKeyInput = document.getElementById('apiKey');
-      const key = apiKeyInput.value.trim();
+      const key = document.getElementById('apiKey').value.trim();
       if (key) {
-        localStorage.setItem('deepseekApiKey', key);
+        localStorage.setItem('novaChartsApiKey', key);
         alert('API Key saved locally.');
       } else {
         alert('Please enter a valid API key.');
@@ -145,31 +187,27 @@
     }
 
     function loadSamplePrompt() {
-      document.getElementById('promptInput').value = "Create a line chart showing monthly sales trends. Use a blue line for sales and add a second red line for customer count. Include a title 'Monthly Sales Performance' and make the y-axis start at 0.";
+      document.getElementById('promptInput').value = "Create a line chart showing monthly sales trends. Use a blue line for sales and a red line for customer count. Title: 'Monthly Sales Performance'. Ensure the Y-axis starts at zero.";
     }
 
     async function fetchData() {
       const input = document.getElementById('dataInput').value.trim();
-      const dataError = document.getElementById('dataError');
-      dataError.style.display = 'none';
+      const errorDiv = document.getElementById('dataError');
+      errorDiv.style.display = 'none';
       try {
         if (/^https?:\/\//.test(input)) {
           showLoading(true);
           const response = await fetch(input);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
           currentData = await response.json();
           showLoading(false);
         } else {
           currentData = JSON.parse(input);
         }
-        console.log("Data loaded successfully:", currentData);
         alert("Data loaded successfully!");
       } catch (error) {
-        console.error("Error fetching or parsing data:", error);
-        dataError.style.display = 'block';
-        dataError.textContent = `Error: ${error.message}`;
+        errorDiv.style.display = 'block';
+        errorDiv.textContent = `Error: ${error.message}`;
         showLoading(false);
       }
     }
@@ -177,27 +215,27 @@
     async function generateChart() {
       const prompt = document.getElementById('promptInput').value.trim();
       const apiKey = document.getElementById('apiKey').value.trim();
-      const promptError = document.getElementById('promptError');
-      const dataError = document.getElementById('dataError');
+      const errorPrompt = document.getElementById('promptError');
+      const errorData = document.getElementById('dataError');
 
-      promptError.style.display = 'none';
-      dataError.style.display = 'none';
+      errorPrompt.style.display = 'none';
+      errorData.style.display = 'none';
 
       if (!prompt) {
-        promptError.style.display = 'block';
-        promptError.textContent = "Please provide a prompt for chart generation.";
+        errorPrompt.style.display = 'block';
+        errorPrompt.textContent = "Please provide a prompt.";
         return;
       }
       if (!apiKey) {
-        alert("Please enter your DeepSeek API key in the API Key Manager panel.");
+        alert("Please enter your API key.");
         return;
       }
       if (!currentData) {
         try {
           currentData = JSON.parse(document.getElementById('dataInput').value.trim());
         } catch (error) {
-          dataError.style.display = 'block';
-          dataError.textContent = "Invalid JSON data format";
+          errorData.style.display = 'block';
+          errorData.textContent = "Invalid JSON format.";
           return;
         }
       }
@@ -207,28 +245,29 @@
       showLoading(true);
 
       try {
-        const systemMessage = `You are a data visualization expert. Generate JavaScript code using Chart.js to visualize data.
-Return ONLY valid JavaScript code that can be executed directly with Chart.js.
-IMPORTANT: Do NOT declare a variable named 'ctx' in your code. Instead, use the predefined variable 'chartCanvas' directly.
-Example of correct usage:
-const chart = new Chart(chartCanvas, {
-  // chart configuration
-});
-The code should create and render a chart based on the provided data and requirements.
-Always include a 'chart' variable that references the Chart.js instance.
-Do not include any explanations or markdown formatting in your response.`;
+        // Updated system message to include instructions for palette styling.
+        const systemMessage = `You are a data visualization expert for Nova Charts. Generate JavaScript code using Chart.js to visualize data.
+Return only valid JavaScript code that can run with Chart.js.
+IMPORTANT:
+  - Use 'chartCanvas' as the canvas reference and assign the resulting Chart.js instance to a variable named 'chart'.
+  - Apply the Nova Charts color palette to the chart:
+       • Primary: #0077cc
+       • Secondary: #00aaff
+       • Accent: #66ccff
+       • Additional Colors: #ff9933, #ff6633
+Do not include any additional text, explanations, or markdown formatting in your response.`;
 
         const requestBody = {
-          model: "deepseek-coder",
+          model: "nova-charts-coder",
           messages: [
             { role: "system", content: systemMessage },
-            { role: "user", content: `Data: ${JSON.stringify(currentData)}\n\nRequirement: ${prompt}\n\nGenerate Chart.js code to create this visualization. Return only JavaScript code that creates and renders a chart named 'chart'. DO NOT create a ctx variable.` }
+            { role: "user", content: `Data: ${JSON.stringify(currentData)}\n\nRequirement: ${prompt}\n\nReturn only JavaScript code.` }
           ],
           temperature: 0.7,
           max_tokens: 2000
         };
 
-        const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+        const response = await fetch('https://api.novacharts.com/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -236,51 +275,40 @@ Do not include any explanations or markdown formatting in your response.`;
           },
           body: JSON.stringify(requestBody)
         });
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error?.message || 'Error calling DeepSeek API');
-        }
-        const responseData = await response.json();
-        if (!responseData.choices || !responseData.choices.length) {
-          throw new Error('No code returned from DeepSeek');
-        }
-        const chartCode = responseData.choices[0].message.content;
 
-        const descriptionResponse = await fetch('https://api.deepseek.com/v1/chat/completions', {
+        const chartCode = (await response.json()).choices?.[0]?.message?.content;
+        if (!chartCode) throw new Error("No chart code returned.");
+
+        const descResponse = await fetch('https://api.novacharts.com/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${apiKey}`
           },
           body: JSON.stringify({
-            model: "deepseek-chat",
+            model: "nova-charts-chat",
             messages: [
-              { role: "system", content: "Write a brief description (2-3 sentences) explaining the key insights from the chart that was just created." },
-              { role: "user", content: `Data: ${JSON.stringify(currentData)}\nChart requirement: ${prompt}\n\nWrite a brief description of what this chart shows and the key insights.` }
+              { role: "system", content: "Write a brief summary (2-3 sentences) explaining the key insights from the generated chart." },
+              { role: "user", content: `Data: ${JSON.stringify(currentData)}\nChart requirement: ${prompt}` }
             ],
             temperature: 0.7,
-            max_tokens: 200
+            max_tokens: 150
           })
         });
-        const descriptionData = await descriptionResponse.json();
-        if (!descriptionData.choices || !descriptionData.choices.length) {
-          throw new Error('No description returned from DeepSeek');
-        }
-        const chartDescription = descriptionData.choices[0].message.content;
+
+        const chartDescription = (await descResponse.json()).choices?.[0]?.message?.content || '';
         executeChartCode(chartCode, chartDescription);
+
       } catch (error) {
-        console.error("Error generating chart:", error);
-        promptError.style.display = 'block';
-        promptError.textContent = `Error: ${error.message}`;
+        errorPrompt.style.display = 'block';
+        errorPrompt.textContent = `Error: ${error.message}`;
       } finally {
         showLoading(false);
       }
     }
 
     function executeChartCode(code, description) {
-      if (currentChart) {
-        currentChart.destroy();
-      }
+      if (currentChart) currentChart.destroy();
       try {
         const chartFunction = new Function('data', 'document', 'Chart', `
           const chartCanvas = document.getElementById('chartCanvas');
@@ -288,12 +316,11 @@ Do not include any explanations or markdown formatting in your response.`;
           return chart;
         `);
         currentChart = chartFunction(currentData, document, Chart);
-        document.getElementById('chartDescription').innerHTML = `<h5>Analysis:</h5><p>${description}</p>`;
+        document.getElementById('chartDescription').innerHTML = `<h5>Analysis</h5><p>${description}</p>`;
         document.getElementById('resultSection').style.display = 'block';
-      } catch (error) {
-        console.error("Error executing chart code:", error);
+      } catch (err) {
         document.getElementById('promptError').style.display = 'block';
-        document.getElementById('promptError').textContent = `Error in chart generation: ${error.message}`;
+        document.getElementById('promptError').textContent = `Chart execution error: ${err.message}`;
       }
     }
 
